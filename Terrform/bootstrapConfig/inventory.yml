@@ -1,0 +1,9 @@
+-
+        name : demo
+        hosts : localhost
+        tasks : 
+          - name : date output
+            command: date
+          - name : ping test
+            ping : 
+

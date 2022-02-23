@@ -1,0 +1,67 @@
+--- 
+- 
+  become: true
+  hosts: all 
+  tasks: 
+    - 
+      apt: "update_cache=yes cache_valid_time=3600"
+      name: "Update apt cache"
+    - 
+      apt: upgrade=dist
+      name: "Upgrade all apt packages"
+    - 
+      apt: 
+        name: "{{ packages }}"
+        state: present
+        update_cache: true
+      name: "Install dependencies"
+      vars: 
+        packages: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - gnupg-agent
+    - 
+      apt_key: 
+        state: present
+        url: "https://download.docker.com/linux/ubuntu/gpg"
+      name: "Add an apt signing key for Docker"
+    - 
+      apt_repository: 
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        state: present
+      name: "Add apt repository for stable version"
+    - 
+      apt: 
+        name: "{{ packages }}"
+        state: present
+        update_cache: true
+      name: "Install Docker"
+      vars: 
+        packages: 
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+    - 
+      name: "Add user to docker group"
+      user: 
+        group: docker
+        name: "ubuntu"
+    - 
+      get_url: 
+        dest: ~/docker-compose
+        mode: +x
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+      name: "Download docker-compose {{ docker_compose_version }}"
+    - 
+      name: "Check docker-compose exists"
+      register: docker_compose
+      stat: path=~/docker-compose
+    - 
+      command: "mv ~/docker-compose /usr/local/bin/docker-compose"
+      name: "Move docker-compose to /usr/local/bin/docker-compose"
+      when: docker_compose.stat.exists
+  vars: 
+    docker_compose_version: "1.27.4"
+

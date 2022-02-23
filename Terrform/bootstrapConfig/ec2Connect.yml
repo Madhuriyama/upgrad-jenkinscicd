@@ -1,0 +1,21 @@
+- hosts: localhost
+  gather_facts: no
+  vars_files: cred.yml
+
+- name: launching ec2 instance for webserver
+  ec2:
+      key_name: Final Assignment
+      instance_type: t2.micro
+      image: ami-04505e74c0741db8d
+      wait: true
+      group: jenkins
+      count: 1
+      vpc_subnet_id: subnet-02f265980e4048d48
+      assign_public_ip: yes
+      region: us-east-1
+      state: present
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      instance_tags:
+        Name: WebServer Final Assignment
+      register: ec2
